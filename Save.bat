@@ -1,6 +1,6 @@
 @echo off
 
-git fetch
+git pull
 git add *
 git commit -m "Save from %ComputerName%"
 git push
