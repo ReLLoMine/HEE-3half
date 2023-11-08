@@ -1,0 +1,127 @@
+#include <iostream>
+#include <queue> //для обхода в ширину
+
+using namespace std;
+
+//---Структура узла в бинарном дереве---//
+struct Node {
+    int data; //информационная часть узла
+    Node *left; //левое поддерево
+    Node *right; //правое поддерево
+
+    Node(int value) : data(value), left(nullptr), right(nullptr) {} //параметризированный конструктор узла
+};
+
+//---Функция для вставки элементов в сбалансированное бинарное дерево---//
+Node *insertBalanced(Node *root, int data, int n) {
+    if (n <= 0) {
+        return nullptr;
+    }
+
+    int mid = n / 2;
+    root = new Node(data);
+    root->left = insertBalanced(root->left, data - mid, mid); //рекурсивное создание левого поддерева
+    root->right = insertBalanced(root->right, data + mid, n - mid - 1); //рекурсивное создание правого поддерева
+
+    return root; //возвращение корневого узла(дерева)
+}
+
+
+//---Функция для подсчета количества узлов в дереве---//
+int countNodes(Node *root) {
+    if (!root) {
+        return 0;
+    }
+
+    return 1 + countNodes(root->left) + countNodes(root->right); //рекурснивный подсчёт количества узлов
+}
+
+
+//---Функция для вывода дерева в виде структуры---//
+void printTreeStructure(Node *root, int level = 0) {
+    if (!root) {
+        return;
+    }
+
+    printTreeStructure(root->right, level + 1); //идём до крайнего правого узла
+    for (int i = 0; i < level; i++) { //как дошли - вывод отступов пропорционально уровню узла
+        cout << "    ";
+    }
+    cout << root->data << endl; //вывод информационной части узла
+    printTreeStructure(root->left, level + 1); //если правых поддеревьев у узла не осталось - вывод левых
+}
+
+int getHeight(Node *root) {
+    if (!root) {
+        return 0;
+    }
+
+    int leftHeight = getHeight(root->left); // рекурсивное получение высоты левого поддерева
+    int rightHeight = getHeight(root->right); // рекурсивное получение высоты правого поддерева
+
+    return 1 + max(leftHeight, rightHeight); // возвращение максимальной высоты из двух поддеревьев плюс 1
+}
+
+int getPathLength(Node *root) {
+    if (!root) {
+        return 0;
+    }
+
+    int leftLength = getPathLength(root->left); // рекурсивный вызов для левого поддерева
+    int rightLength = getPathLength(root->right); // рекурсивный вызов для правого поддерева
+
+    return 1 + leftLength +
+           rightLength; // возвращение суммы длин путей в левом и правом поддеревьях, плюс 1 для учета текущего узла
+}
+
+double calculateAverage(Node *root) {
+    if (!root) {
+        return 0.0;
+    }
+
+    double sum = root->data; // сумма равна значению текущего узла
+    double count = 1.0; // начальное количество узлов равно 1
+
+    if (root->left) {
+        sum += calculateAverage(root->left); // добавляем сумму и количество из левого поддерева
+        count += countNodes(root->left); // увеличиваем количество узлов из левого поддерева
+    }
+
+    if (root->right) {
+        sum += calculateAverage(root->right); // добавляем сумму и количество из правого поддерева
+        count += countNodes(root->right); // увеличиваем количество узлов из правого поддерева
+    }
+
+    return sum / count; // возвращаем среднее арифметическое
+}
+
+
+int main() {
+    setlocale(LC_ALL, "Rus");
+    int n;
+    cout << "Введите количество узлов (n): ";
+    cin >> n;
+
+    Node *root = nullptr; //корневой узел
+
+    if (n > 0) {
+        root = insertBalanced(root, n / 2, n); //генерация идеально сбалансированного дерева из n узлов
+    }
+
+    cout << "Дерево после вставки: ";
+    cout << endl << endl;
+    printTreeStructure(root); //вывод дерева
+    int height = getHeight(root); // получение высоты дерева
+    int pathLength = getPathLength(root); // получение длины пути дерева
+
+    cout << "Высота дерева: " << height << endl;
+    cout << "Длина пути дерева: " << pathLength << endl;
+
+    double average = calculateAverage(root); // вычисление среднего арифметического для дерева
+
+    cout << "Среднее арифметическое всех чисел в дереве: " << average << endl;
+
+
+
+    return 0;
+}
